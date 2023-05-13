@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:io';
+
+import 'package:camera/camera.dart';
 
 class ChooseSauBenh extends StatefulWidget {
-  ChooseSauBenh({
+  ChooseSauBenh(
+    this.file, {
     super.key,
     this.loaicay,
   });
+  XFile file;
   final String? loaicay;
   @override
   State<ChooseSauBenh> createState() => _ChooseSauBenhState();
@@ -61,6 +66,8 @@ class _ChooseSauBenhState extends State<ChooseSauBenh> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
+    File picture = File(widget.file.path);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -87,15 +94,16 @@ class _ChooseSauBenhState extends State<ChooseSauBenh> {
             Container(
               width: size.width,
               height: size.height * .60,
-              decoration: BoxDecoration(color: Colors.greenAccent),
+              // decoration: BoxDecoration(color: Colors.greenAccent),
               child: Center(
-                child: Text(
-                  "picture".toUpperCase(),
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w500),
-                ),
+                // child: Text(
+                //   "picture".toUpperCase(),
+                //   style: TextStyle(
+                //       color: Colors.black,
+                //       fontSize: 30,
+                //       fontWeight: FontWeight.w500),
+                // ),
+                child: Image.file(picture),
               ),
             ),
             SizedBox(
@@ -145,30 +153,35 @@ class _ChooseSauBenhState extends State<ChooseSauBenh> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        color: Colors.red,
-                        border: Border.all(
-                            width: 2, color: Colors.black.withOpacity(.2))),
-                    width: size.width * .40,
-                    height: size.height * .05,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.delete,
-                          color: Colors.black,
-                          size: 20,
-                        ),
-                        Text(
-                          "delete".toUpperCase(),
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400),
-                        )
-                      ],
+                  InkWell(
+                    onTap: () {
+                      print("loai cay phan loai la : ${widget.loaicay}");
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          color: Colors.red,
+                          border: Border.all(
+                              width: 2, color: Colors.black.withOpacity(.2))),
+                      width: size.width * .40,
+                      height: size.height * .05,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.delete,
+                            color: Colors.black,
+                            size: 20,
+                          ),
+                          Text(
+                            "delete".toUpperCase(),
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                   Container(

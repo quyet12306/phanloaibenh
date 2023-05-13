@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 
 import 'choose_sau_benh.dart';
 
-void main() {
+late List<CameraDescription> cameras;
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  cameras = await availableCameras();
   runApp(const MyApp());
 }
 
@@ -34,6 +39,30 @@ class _HomePageState extends State<HomePage> {
   // list lựa chọn cây
   List<String> options = ["Dưa lưới", "Lúa", "Vải", "Bưởi"];
   late String selectedOption = options[0];
+  // camera controlor
+  late CameraController _controller;
+  void initState() {
+    super.initState();
+    _controller = CameraController(cameras[0], ResolutionPreset.max);
+    _controller.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+    }).catchError((Object e) {
+      if (e is CameraException) {
+        switch (e.code) {
+          case 'cameraAccessDeniedd':
+            print("access war denied");
+            break;
+          default:
+            print(e.description);
+            break;
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -81,36 +110,61 @@ class _HomePageState extends State<HomePage> {
               height: size.height * .65,
               padding: EdgeInsets.only(
                   left: size.width * .05, right: size.width * .05),
-              decoration: BoxDecoration(color: Colors.green),
-              child: Center(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.camera_alt,
-                    size: 50,
-                    color: Colors.white,
-                  ),
-                  Text(
-                    'camera'.toUpperCase(),
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold),
-                  )
-                ],
-              )),
+              // decoration: BoxDecoration(color: Colors.green),
+              // child: Center(
+              //     child: Column(
+              //   crossAxisAlignment: CrossAxisAlignment.center,
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     Icon(
+              //       Icons.camera_alt,
+              //       size: 50,
+              //       color: Colors.white,
+              //     ),
+              //     Text(
+              //       'camera'.toUpperCase(),
+              //       style: TextStyle(
+              //           color: Colors.white,
+              //           fontSize: 30,
+              //           fontWeight: FontWeight.bold),
+              //     )
+              //   ],
+              // )),
+              child: CameraPreview(_controller),
+            ),
+            SizedBox(
+              height: 10,
             ),
             InkWell(
-              onTap: () {
+              onTap: () async {
                 print("loai cay la ${selectedOption}");
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ChooseSauBenh(
-                              loaicay: selectedOption,
-                            )));
+                // Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //         builder: (context) => ChooseSauBenh(
+                //               loaicay: selectedOption,
+                //             )));
+                if (!_controller.value.isInitialized) {
+                  return null;
+                }
+                if (_controller.value.isTakingPicture) {
+                  return null;
+                }
+
+                try {
+                  await _controller.setFlashMode(FlashMode.auto);
+                  XFile file = await _controller.takePicture();
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ChooseSauBenh(
+                                file,
+                                loaicay: selectedOption,
+                              )));
+                } on CameraException catch (e) {
+                  debugPrint("error occured while taking picture : ${e}");
+                  return null;
+                }
               },
               child: Container(
                 width: size.width * .15,
